@@ -30,7 +30,7 @@ d3.json(queryUrl, function (geoJson) {
 });
 
 function Color(magnitude) {
-    if (magnitude > 5.5) {
+    if (magnitude >= 5.5) {
         return 'black'
     } else if (magnitude > 5.3) {
         return 'red'
@@ -73,23 +73,32 @@ function createMap(earthquakes) {
       }).addTo(myMap);
       
     var legend = L.control({position: "bottomleft"});
-
-    legend.onAdd = function(myMap) {
         
-        var div = L.DomUtil.create("div", "info legend"),
-            magnitude = [4.7,4.9,5.1,5.3,5.5],
-            labels = [];
+        legend.onAdd = function (map) {
+        
+        var div = L.DomUtil.create('div', 'info legend');
+        magnitude = ["4.5", "4.7", "4.9", "5.1", "5.3", "5.5"];
+        labels = [];
 
-        div.innerHTML += "<h4 style='margin:5px'>Magnitude</h4>"
+        div.innerHTML='<div><b>Magnitude</b></div';
 
         for (var i = 0; i < magnitude.length; i++) {
             div.innerHTML +=
-            "<li style=\"background:" + Color(magnitude[i] + 1) + "\"></li> " +
-            magnitude[i] + (magnitude[i + 1] ? "&ndash;" + magnitude[i + 1] + "<br>" : "+");
+                '<i style="background:' + getColor(magnitude[i] + 1) + '"></i> ' +
+                magnitude[i] + (magnitude[i + 1] ? '&ndash;' + magnitude[i + 1] + '<br>' : '+');
         }
-
         return div;
     };
-
+        
     legend.addTo(myMap);
+}
+
+function getColor(d) {
+    return d >= 5.5 ? 'black' :
+           d > 5.3  ? 'red' :
+           d > 5.1  ? 'orange' :
+           d > 4.9  ? 'yellow' :
+           d > 4.7   ? 'green' :
+           d > 4.5  ? 'lightgreen' :
+                        'white' ;
 }
