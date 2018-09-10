@@ -7,7 +7,7 @@ d3.json(queryUrl, function(data) {
 function createFeatures(earthquakeData) {
 
     function onEachFeature(feature, layer) {
-        layer.bindPopup("<h3>" + feature.properties.place +
+        layer.bindPopup("<h3>" + feature.properties.place + "<br> Magnitude: " + feature.properties.mag +
           "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
     }
 
@@ -36,9 +36,7 @@ function createMap(earthquakes) {
     };
 
     var myMap = L.map("map", {
-        center: [
-          37.09, -95.71
-        ],
+        center: [16.97, -7.99],
         zoom: 1.5,
         layers: [streetmap, earthquakes]
     });
@@ -46,4 +44,4 @@ function createMap(earthquakes) {
     L.control.layers(baseMaps, overlayMaps, {
         collapsed: false
       }).addTo(myMap);
-}
+    }
