@@ -1,22 +1,49 @@
 var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson"
 
-d3.json(queryUrl, function(data) {
-    createFeatures(data.features);
-  });
+function markerSize(magnitude) {
+    return magnitude * 3;
+};
 
-function createFeatures(earthquakeData) {
+var earthquakes = new L.LayerGroup();
 
-    function onEachFeature(feature, layer) {
+d3.json(queryUrl, function (geoJson) {
+    L.geoJSON(geoJson.features, {
+        pointToLayer: function (geoJsonPoint, latlng) {
+            return L.circleMarker(latlng, { radius: markerSize(geoJsonPoint.properties.mag) });
+        },
+
+        style: function (geoJsonFeature) {
+            return {
+                fillColor: Color(geoJsonFeature.properties.mag),
+                fillOpacity: 0.8,
+                weight: 0.5,
+                color: "black"
+            }
+        },
+        
+        onEachFeature(feature, layer) {
         layer.bindPopup("<h3>" + feature.properties.place + "<br> Magnitude: " + feature.properties.mag +
           "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
-    }
-
-    var earthquakes = L.geoJSON(earthquakeData, {
-        onEachFeature: onEachFeature
-      });
-
+        }
+    }).addTo(earthquakes);
     createMap(earthquakes);
-}
+});
+
+function Color(magnitude) {
+    if (magnitude > 5.5) {
+        return 'black'
+    } else if (magnitude > 5.3) {
+        return 'red'
+    } else if (magnitude > 5.1) {
+        return 'orange'
+    } else if (magnitude > 4.9) {
+        return 'yellow'
+    } else if (magnitude > 4.7) {
+        return 'green'
+    } else {
+        return 'lightgreen'
+    }
+};
 
 function createMap(earthquakes) {
 
@@ -44,4 +71,25 @@ function createMap(earthquakes) {
     L.control.layers(baseMaps, overlayMaps, {
         collapsed: false
       }).addTo(myMap);
-    }
+      
+    var legend = L.control({position: "bottomleft"});
+
+    legend.onAdd = function(myMap) {
+        
+        var div = L.DomUtil.create("div", "info legend"),
+            magnitude = [4.7,4.9,5.1,5.3,5.5],
+            labels = [];
+
+        div.innerHTML += "<h4 style='margin:5px'>Magnitude</h4>"
+
+        for (var i = 0; i < magnitude.length; i++) {
+            div.innerHTML +=
+            "<li style=\"background:" + Color(magnitude[i] + 1) + "\"></li> " +
+            magnitude[i] + (magnitude[i + 1] ? "&ndash;" + magnitude[i + 1] + "<br>" : "+");
+        }
+
+        return div;
+    };
+
+    legend.addTo(myMap);
+}
